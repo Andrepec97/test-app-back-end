@@ -40,7 +40,7 @@ class UserService {
     userExist = (email) => {
         if (!email) return false;
         const userFound = this.users.find((utente) => utente.email === email);
-        return userFound ?? false;
+        return !!userFound;
     }
 
     signUp(email, password) {

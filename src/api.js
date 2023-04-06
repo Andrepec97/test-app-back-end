@@ -1,13 +1,15 @@
 const express = require("express");
 const serverless = require("serverless-http");
+const cors = require('cors');
 
 const app = express();
 const router = express.Router();
 
 app.use(express.json());
+app.use(cors({origin: "*"}));
 const users = []
 
-router.post('/login', (req, res) => {
+router.post('/login', cors(), (req, res) => {
     const user = req.body;
     if (!user.email || !user.password) return res.status(400).json({
         success: false,
@@ -29,7 +31,7 @@ router.post('/login', (req, res) => {
     res.status(200).json({success: true, message: 'Logged in'})
 })
 
-router.post('/sign-up', (req, res) => {
+router.post('/sign-up', cors(), (req, res) => {
     const user = req.body;
     if (!user.email || !user.password) return res.status(400).json({
         success: false,
@@ -46,10 +48,6 @@ router.post('/sign-up', (req, res) => {
     console.log(users)
     res.status(201).json({success: true, message: 'Signed Up'})
 })
-
-// router.all('/*', (req, res) => {
-//     res.status(403).json({success: false, message: 'You are not allowed to this url'});
-// })
 
 app.use(`/`, router);
 

@@ -51,7 +51,7 @@ router.all('*', (req, res) => {
     res.status(403).json({success: false, message: 'You are not allowed to this url'});
 })
 
-app.use(`/.netlify/functions/api`, router);
+app.use(`/`, router);
 
 module.exports = app;
 module.exports.handler = serverless(app);

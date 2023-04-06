@@ -47,9 +47,9 @@ router.post('/sign-up', (req, res) => {
     res.status(201).json({success: true, message: 'Signed Up'})
 })
 
-router.all('*', (req, res) => {
-    res.status(403).json({success: false, message: 'You are not allowed to this url'});
-})
+// router.all('/*', (req, res) => {
+//     res.status(403).json({success: false, message: 'You are not allowed to this url'});
+// })
 
 app.use(`/`, router);
 

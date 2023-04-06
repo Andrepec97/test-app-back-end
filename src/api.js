@@ -1,11 +1,14 @@
 const express = require("express");
 const serverless = require("serverless-http");
 const cors = require('cors');
+
 const app = express();
-app.use(express.json());
-app.use(cors({origin: "https://all-well-app.netlify.app"}));
 const router = express.Router();
 const mailer = require("nodemailer");
+
+app.use(express.json());
+app.use(cors({origin: "https://all-well-app.netlify.app"}));
+
 
 class MailService {
     async sendResetMail(email) {
@@ -25,7 +28,9 @@ class MailService {
             subject: "Test App - Reset Password",
             html: htmlText
         };
-        smtpProtocol.sendMail(mailOption, (err) => !err);
+        await smtpProtocol.sendMail(mailOption, (err) => {
+            if (!!err) return err.message
+        });
     }
 }
 
@@ -114,7 +119,7 @@ router.post('/change-password-email', cors(), (req, res) => {
     mailService.sendResetMail(user.email).then((imailSended) => {
         if (!imailSended) return res.status(400).json({
             success: false,
-            message: 'Error in sending email'
+            message: 'Error in sending email '
         })
         res.status(200).json({success: true, message: 'Email sended'})
     })

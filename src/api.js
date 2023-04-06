@@ -1,14 +1,11 @@
 const express = require("express");
 const serverless = require("serverless-http");
 const cors = require('cors');
-
 const app = express();
-const router = express.Router();
-const mailer = require("nodemailer");
-
 app.use(express.json());
 app.use(cors({origin: "https://all-well-app.netlify.app"}));
-
+const router = express.Router();
+const mailer = require("nodemailer");
 
 class MailService {
     async sendResetMail(email) {

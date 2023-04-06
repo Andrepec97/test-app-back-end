@@ -6,7 +6,7 @@ const app = express();
 const router = express.Router();
 
 app.use(express.json());
-app.use(cors({origin: "https://all-well-app.netlify.app"}));
+app.use(cors({origin: "*"}));
 const users = []
 
 router.post('/login', cors(), (req, res) => {

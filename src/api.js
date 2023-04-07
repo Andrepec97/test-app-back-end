@@ -107,7 +107,7 @@ router.post('/change-password-email', cors(), (req, res) => {
     tranport.sendMail(message, (error) => {
         if (!!error) return res.status(400).json({
             success: false,
-            message: `Error in sending email:with credentials user: ${process.env.MAIL_USER}, pass:${process.env.MAIL_PASSWORD} - Error: ${error}`
+            message: `Error in sending email`
         })
         res.status(200).json({success: true, message: 'Email sent'})
     })

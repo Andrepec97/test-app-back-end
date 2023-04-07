@@ -9,8 +9,11 @@ const nodemailer = require("nodemailer");
 app.use(express.json());
 app.use(cors({origin: "https://all-well-app.netlify.app"}));
 const tranport = nodemailer.createTransport({
-    host: 'smtp.gmail.com', port: 587, auth: {
-        user: process.env.MAIL_USER, pass: process.env.MAIL_PASSWORD,
+    host: 'smtp.gmail.com',
+    port: 587,
+    auth: {
+        user: process.env.MAIL_USER,
+        pass: process.env.MAIL_PASSWORD,
     }
 });
 
@@ -22,13 +25,17 @@ class UserService {
     userExist = (email) => {
         if (!email) return false;
         const userFound = this.users.find((utente) => utente.email === email);
-        return !!userFound;
+        return !!userFound ? userFound : false;
     }
 
-    signUp(user) {
-        if (!user.email || !user.password) return false;
-        this.users.push(user);
-        return user;
+    signUp(email, password) {
+        if (!email || !password) return false;
+        const newUser = {
+            email: email,
+            password: password
+        };
+        this.users.push(newUser);
+        return newUser;
     }
 
     changePassword(email, password) {
@@ -43,16 +50,19 @@ const userService = new UserService();
 router.post('/login', cors(), (req, res) => {
     const user = req.body;
     if (!user.email || !user.password) return res.status(400).json({
-        success: false, message: 'Email and password required'
+        success: false,
+        message: 'Email and password required'
     })
 
     const userExist = userService.userExist(user.email)
     if (!userExist) return res.status(400).json({
-        success: false, message: 'User does not exist, please verify credentials or sign up'
+        success: false,
+        message: 'User does not exist, please verify credentials or sign up'
     })
 
     if (userExist.password !== user.password) return res.status(400).json({
-        success: false, message: 'Email or password wrong'
+        success: false,
+        message: 'Email or password wrong'
     })
 
     res.status(200).json({success: true, message: 'Logged in'})
@@ -61,27 +71,31 @@ router.post('/login', cors(), (req, res) => {
 router.post('/sign-up', cors(), (req, res) => {
     const user = req.body;
     if (!user.email || !user.password) return res.status(400).json({
-        success: false, message: 'Email and password required'
+        success: false,
+        message: 'Email and password required'
     })
 
     const isUserAlreadySigned = userService.userExist(user.email)
     if (!!isUserAlreadySigned) return res.status(400).json({
-        success: false, message: 'Email found - User already signed up'
+        success: false,
+        message: 'Email found - User already signed up'
     })
 
-    userService.signUp(user)
+    userService.signUp(user.email, user.password)
     res.status(201).json({success: true, message: 'Signed Up'})
 })
 
 router.post('/change-password-email', cors(), (req, res) => {
     const user = req.body;
     if (!user.email) return res.status(400).json({
-        success: false, message: 'Email required'
+        success: false,
+        message: 'Email required'
     })
 
     const userExist = userService.userExist(user.email)
     if (!userExist) return res.status(400).json({
-        success: false, message: 'This email is not signed up yet. Please sign up before'
+        success: false,
+        message: 'This email is not signed up yet. Please sign up before'
     })
     const message = {
         from: `Test App <${process.env.MAIL_USER}`,
@@ -91,7 +105,8 @@ router.post('/change-password-email', cors(), (req, res) => {
     };
     tranport.sendMail(message, (error) => {
         if (!!error) return res.status(400).json({
-            success: false, message: `Error in sending email: ${error}`
+            success: false,
+            message: `Error in sending email:with credentials user: ${process.env.MAIL_USER}, pass:${process.env.MAIL_PASSWORD} - Error: ${error}`
         })
         res.status(200).json({success: true, message: 'Email sent'})
     })
@@ -100,12 +115,14 @@ router.post('/change-password-email', cors(), (req, res) => {
 router.post('/change-password', cors(), (req, res) => {
     const user = req.body;
     if (!user.email || !user.password) return res.status(400).json({
-        success: false, message: 'Email and password required'
+        success: false,
+        message: 'Email and password required'
     })
 
     const userExist = userService.userExist(user.email)
     if (!userExist) return res.status(400).json({
-        success: false, message: 'This email is not signed up yet. Please sign up before'
+        success: false,
+        message: 'This email is not signed up yet. Please sign up before'
     })
 
     userService.changePassword(user.email, user.password)

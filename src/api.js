@@ -8,6 +8,7 @@ const nodemailer = require("nodemailer");
 
 app.use(express.json());
 app.use(cors({origin: "https://all-well-app.netlify.app"}));
+
 const tranport = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 587,

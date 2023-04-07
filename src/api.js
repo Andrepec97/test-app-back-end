@@ -4,35 +4,18 @@ const cors = require('cors');
 
 const app = express();
 const router = express.Router();
-const mailer = require("nodemailer");
+const nodemailer = require("nodemailer");
 
 app.use(express.json());
 app.use(cors({origin: "https://all-well-app.netlify.app"}));
-
-
-class MailService {
-    async sendResetMail(email) {
-        const smtpProtocol = mailer.createTransport({
-            service: "smtp.gmail.com",
-            port: 587,
-            auth: {
-                user: process.env.MAIL_USER,
-                pass: process.env.MAIL_PASSWORD
-            }
-        });
-        if (!email) return false;
-        const htmlText = `<h1>Test App - Reset Password</h1> <br/><br/><br/> <h4>We received your request to reset your passworda.</h4> <br/> To reset your password click <a href="https://all-well-app.netlify.app/change-password.html/?email=${email}">HERE</a><br/>`;
-        const mailOption = {
-            from: `App Test <${process.env.MAIL_USER}>`,
-            to: `${email}`,
-            subject: "Test App - Reset Password",
-            html: htmlText
-        };
-        await smtpProtocol.sendMail(mailOption, (err) => {
-            if (!!err) return err.message
-        });
+const tranport = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 587,
+    auth: {
+        user: process.env.MAIL_USER,
+        pass: process.env.MAIL_PASSWORD,
     }
-}
+});
 
 class UserService {
     constructor() {
@@ -64,7 +47,6 @@ class UserService {
 }
 
 const userService = new UserService();
-const mailService = new MailService()
 router.post('/login', cors(), (req, res) => {
     const user = req.body;
     if (!user.email || !user.password) return res.status(400).json({
@@ -115,13 +97,18 @@ router.post('/change-password-email', cors(), (req, res) => {
         success: false,
         message: 'This email is not signed up yet. Please sign up before'
     })
-
-    mailService.sendResetMail(user.email).then((imailSended) => {
-        if (!imailSended) return res.status(400).json({
+    const message = {
+        from: `Test App <${process.env.MAIL_USER}`,
+        to: user.email,
+        subject: 'Test App - Change Password',
+        html: `<h1>Test App</h1><br/><h3>Change Password</h3><br/><p>Hi!<br/>We received a request to reset your password.<br/>To procede <a href="https://all-well-app.netlify.app/change-password.html?email=${user.email}">Click Here!</a></p>`
+    };
+    tranport.sendMail(message, (error) => {
+        if (!!error) return res.status(400).json({
             success: false,
-            message: 'Error in sending email '
+            message: `Error in sending email: ${error}`
         })
-        res.status(200).json({success: true, message: 'Email sended'})
+        res.status(200).json({success: true, message: 'Email sent'})
     })
 })
 
